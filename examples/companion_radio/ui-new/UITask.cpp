@@ -102,43 +102,50 @@ class HomeScreen : public UIScreen {
 
 
   void renderBatteryIndicator(DisplayDriver& display, uint16_t batteryMilliVolts) {
-    // Convert millivolts to percentage
-#ifndef BATT_MIN_MILLIVOLTS
-  #define BATT_MIN_MILLIVOLTS 3000
-#endif
-#ifndef BATT_MAX_MILLIVOLTS
-  #define BATT_MAX_MILLIVOLTS 4200
-#endif
-    const int minMilliVolts = BATT_MIN_MILLIVOLTS;
-    const int maxMilliVolts = BATT_MAX_MILLIVOLTS;
+    int minMilliVolts = 3000;
+    #ifdef AUTO_SHUTDOWN_MILLIVOLTS
+      minMilliVolts = AUTO_SHUTDOWN_MILLIVOLTS;
+    #endif
+
+    const int maxMilliVolts = 4200;
     int batteryPercentage = ((batteryMilliVolts - minMilliVolts) * 100) / (maxMilliVolts - minMilliVolts);
-    if (batteryPercentage < 0) batteryPercentage = 0; // Clamp to 0%
-    if (batteryPercentage > 100) batteryPercentage = 100; // Clamp to 100%
+    batteryPercentage = constrain(batteryPercentage, 0, 100);
 
-    // battery icon
-    int iconWidth = 24;
-    int iconHeight = 10;
-    int iconX = display.width() - iconWidth - 5; // Position the icon near the top-right corner
-    int iconY = 0;
-    display.setColor(DisplayDriver::GREEN);
+    #ifdef TEXT_BATTERY
+      // ===== TEXT BATTERY =====
+      int battBackWidth = 24;
+      int battBackHeight = 10;
+      int battBackStartPosY = 0;
+      int battBackStartPosX = display.width() - battBackWidth - 5;
 
-    // battery outline
-    display.drawRect(iconX, iconY, iconWidth, iconHeight);
+      String batteryPercText = String(batteryPercentage) + "%";
+      int battTextStartPosX = display.width() - 5;
 
-    // battery "cap"
-    display.fillRect(iconX + iconWidth, iconY + (iconHeight / 4), 3, iconHeight / 2);
+      display.setColor(DisplayDriver::DARK);
+      display.fillRect(battBackStartPosX, battBackStartPosY, battBackWidth, battBackHeight);
+      display.setTextSize(1);
+      display.setColor(DisplayDriver::GREEN);
+      display.drawTextRightAlign(battTextStartPosX, 1, batteryPercText.c_str());
 
-    // fill the battery based on the percentage
-    int fillWidth = (batteryPercentage * (iconWidth - 4)) / 100;
-    display.fillRect(iconX + 2, iconY + 2, fillWidth, iconHeight - 4);
+    #else
+      // ===== ICON BATTERY =====
+      int iconWidth = 24;
+      int iconHeight = 10;
+      int iconX = display.width() - iconWidth - 5;
+      int iconY = 0;
 
-    // show muted icon if buzzer is muted
-#ifdef PIN_BUZZER
-    if (_task->isBuzzerQuiet()) {
-      display.setColor(DisplayDriver::RED);
-      display.drawXbm(iconX - 9, iconY + 1, muted_icon, 8, 8);
-    }
-#endif
+      display.setColor(DisplayDriver::GREEN);
+
+      // outline
+      display.drawRect(iconX, iconY, iconWidth, iconHeight);
+
+      // cap
+      display.fillRect(iconX + iconWidth, iconY + (iconHeight / 4), 3, iconHeight / 2);
+
+      // fill
+      int fillWidth = (batteryPercentage * (iconWidth - 4)) / 100;
+      display.fillRect(iconX + 2, iconY + 2, fillWidth, iconHeight - 4);
+    #endif
   }
 
   CayenneLPP sensors_lpp;
@@ -904,13 +911,14 @@ void UITask::toggleGPS() {
           _sensors->setSettingValue("gps", "0");
           _node_prefs->gps_enabled = 0;
           notify(UIEventType::ack);
+          showAlert("GPS: Disabled", 800);
         } else {
           _sensors->setSettingValue("gps", "1");
           _node_prefs->gps_enabled = 1;
           notify(UIEventType::ack);
+          showAlert("GPS: Enabled", 800);
         }
         the_mesh.savePrefs();
-        showAlert(_node_prefs->gps_enabled ? "GPS: Enabled" : "GPS: Disabled", 800);
         _next_refresh = 0;
         break;
       }
@@ -924,12 +932,13 @@ void UITask::toggleBuzzer() {
     if (buzzer.isQuiet()) {
       buzzer.quiet(false);
       notify(UIEventType::ack);
+      showAlert("Buzzer: ON", 800);
     } else {
       buzzer.quiet(true);
+      showAlert("Buzzer: OFF", 800);
     }
     _node_prefs->buzzer_quiet = buzzer.isQuiet();
     the_mesh.savePrefs();
-    showAlert(buzzer.isQuiet() ? "Buzzer: OFF" : "Buzzer: ON", 800);
     _next_refresh = 0;  // trigger refresh
   #endif
 }
