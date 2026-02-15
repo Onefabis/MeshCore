@@ -11,6 +11,6 @@ const uint32_t g_ADigitalPinMap[] = {
 
 void initVariant()
 {
-  pinMode(DISPLAY_TOGGLE, INPUT_PULLUP);
+  pinMode(DISPLAY_MSG_TOGGLE, INPUT_PULLUP);
 }
 

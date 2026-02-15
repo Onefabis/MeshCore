@@ -659,7 +659,7 @@ void UITask::newMsg(uint8_t path_len, const char* from_name, const char* text, i
 
   if (_display != NULL) {
 
-    #ifdef DISPLAY_TOGGLE
+    #ifdef DISPLAY_MSG_TOGGLE
       if (_displayWakeOnMsg) {
     #endif
 
@@ -667,7 +667,7 @@ void UITask::newMsg(uint8_t path_len, const char* from_name, const char* text, i
           _display->turnOn();
         }
 
-    #ifdef DISPLAY_TOGGLE
+    #ifdef DISPLAY_MSG_TOGGLE
       }
     #endif
 
@@ -818,8 +818,8 @@ void UITask::loop() {
   }
 #endif
 
-#if defined(DISPLAY_TOGGLE)
-  bool disp_state = (digitalRead(DISPLAY_TOGGLE) == LOW); // ACTIVE LOW
+#if defined(DISPLAY_MSG_TOGGLE)
+  bool disp_state = (digitalRead(DISPLAY_MSG_TOGGLE) == LOW); // ACTIVE LOW
 
   // edge: press
   if (disp_state && !_dispTglPrevState) {

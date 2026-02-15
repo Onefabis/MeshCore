@@ -10,6 +10,10 @@ HeltecV3Board board;
   RADIO_CLASS radio = new Module(P_LORA_NSS, P_LORA_DIO_1, P_LORA_RESET, P_LORA_BUSY);
 #endif
 
+#if defined(DISPLAY_MSG_TOGGLE)
+ pinMode(DISPLAY_MSG_TOGGLE, INPUT_PULLUP);
+#endif
+
 WRAPPER_CLASS radio_driver(radio, board);
 
 ESP32RTCClock fallback_clock;

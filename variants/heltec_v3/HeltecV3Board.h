@@ -14,6 +14,8 @@
 #define  PIN_ADC_CTRL_ACTIVE    LOW
 #define  PIN_ADC_CTRL_INACTIVE  HIGH
 
+#define DISPLAY_MSG_TOGGLE   -1
+
 #include <driver/rtc_io.h>
 
 class HeltecV3Board : public ESP32Board {

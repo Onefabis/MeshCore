@@ -50,7 +50,7 @@ class UITask : public AbstractUITask {
 
 bool _displayWakeOnMsg = true;
 
-#if defined(DISPLAY_TOGGLE)
+#if defined(DISPLAY_MSG_TOGGLE)
   bool _dispTglPrevState = false;
   uint32_t _dispTglPressStart = 0;
   bool _dispTglLongHandled = false;
